@@ -22,9 +22,9 @@
 	.db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 	.db "CP/M",0
 objname4dimg:
-	.db $15,"cpm.00000"
+	.db $15,"cpm00000",0
 objname4bdata
-	.db $15,"BUF4PAGIN"
+	.db $15,"BUF4PGIN",0
 main4cpmemu:
 	ld hl,objname4bdata
 	call 0020320h	;_Mov9ToOP1
@@ -498,25 +498,25 @@ bios_adl_read:
 
 	ld a,(disksec)
 	call dec2hex
-	ld (objname4dimg+9),a
+	ld (objname4dimg+8),a
 	ld a,(disksec)
 	rrca
 	rrca
 	rrca
 	rrca
 	call dec2hex
-	ld (objname4dimg+8),a
+	ld (objname4dimg+7),a
 
 	ld a,(disktrk)
 	call dec2hex
-	ld (objname4dimg+7),a
+	ld (objname4dimg+6),a
 	ld a,(disktrk)
 	rrca
 	rrca
 	rrca
 	rrca
 	call dec2hex
-	ld (objname4dimg+6),a
+	ld (objname4dimg+5),a
 
 	ld hl,objname4bdata
 	call 0020320h	;_Mov9ToOP1
@@ -574,25 +574,25 @@ bios_adl_write:
 
 	ld a,(disksec)
 	call dec2hex
-	ld (objname4dimg+9),a
+	ld (objname4dimg+8),a
 	ld a,(disksec)
 	rrca
 	rrca
 	rrca
 	rrca
 	call dec2hex
-	ld (objname4dimg+8),a
+	ld (objname4dimg+7),a
 
 	ld a,(disktrk)
 	call dec2hex
-	ld (objname4dimg+7),a
+	ld (objname4dimg+6),a
 	ld a,(disktrk)
 	rrca
 	rrca
 	rrca
 	rrca
 	call dec2hex
-	ld (objname4dimg+6),a
+	ld (objname4dimg+5),a
 
 	ld de,dmabuff
 	ld a,mb
