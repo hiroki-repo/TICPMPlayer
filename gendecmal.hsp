@@ -1,0 +1,11 @@
+fname="cpmrun.bin"
+exist fname:strsize2=strsize
+sdim data,strsize2
+bload fname,data
+logmesx=""
+repeat strsize2
+logmesx+=str(peek(data,cnt))+","
+loop
+notesel logmesx
+notesave "cpmrun.dec"
+end
