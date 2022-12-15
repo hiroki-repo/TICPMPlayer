@@ -518,7 +518,7 @@ bios_adl_read:
 	call dec2hex
 	ld (objname4dimg+5),a
 
-	ld hl,objname4bdata
+	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	jp c,bios_adl_rw_error
@@ -601,7 +601,7 @@ bios_adl_write:
 	ld bc,128
 	ldir
 
-	ld hl,objname4bdata
+	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	jp c,bios_adl_rw_error
