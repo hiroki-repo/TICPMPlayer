@@ -22,26 +22,32 @@
 	.db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 	.db "CP/M",0
 objname4dimg:
-	.db $15,"cpm00000",0
+	.db $15,"CPM00000",0
 objname4bdata
 	.db $15,"BUF4PGIN",0
 main4cpmemu:
 	ld hl,objname4bdata
-	call 0020320h	;_Mov9ToOP1
-	call 002050Ch	;_ChkFindSym
-	jp nc,main4cpmemu_2
+	;call 0020320h	;_Mov9ToOP1
+	;call 002050Ch	;_ChkFindSym
+	;jp nc,main4cpmemu_2
 main4cpmemu_1:
 	ld hl,0020000h
-	call 0021338h	;_CreateVar
-	ld (ptr4allocedmem+0),hl
+	;call 0021338h	;_CreateVar
+	;ld (ptr4allocedmem+0),hl
 	ld bc,0010000h
 	add hl,bc
-	ld (ptr4allocedmem+0),hl
+	;ld (ptr4allocedmem+3),hl
+	ld hl,(ptr4allocedmem+0)
 	ld bc,0020000h
 	ld a,0
 	ld (disktrk+0),a
 	ld (disktrk+1),a
 	ld (disktrk+2),a
+	;call 0210e0h	;_MemSet
+	call backupcpmram_2
+	ld bc,010000h
+	ld hl,0d00000h
+	ld a,0
 	call 0210e0h	;_MemSet
 	ld bc,biossize
 	ld de,0d0fa00h
@@ -56,21 +62,40 @@ main4cpmemu_1:
 	ld (disksec+1),a
 	ld (disksec+2),a
 	call.lil bios_adl_read
-	call backupcpmram_2
+	and a,a
+	jp z,cpm00000found
+	ld bc,01600h
+	ld de,0d0dc00h
+	ld hl,cpm62k
+	ldir
+	ld bc,128
+	ld de,0d08000h
+	ld hl,cpmbtl
+	ldir
+cpm00000found:
+	;call backupcpmram_2
+	ld a,0c3h
+	ld hl,08000h
+	ld (0d08080h),a
+	ld (0d08081h),hl
 	ld hl,08000h
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
+;lplp:	jr lplp
 	call _em180
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
+notfound:
+	call backupcpmram
 	call restorecpmram_2
 	ld hl,objname4bdata
-	call 0020320h	;_Mov9ToOP1
-	call 002050Ch	;_ChkFindSym
-	call 0020588h	;_DelVar
+	;call 0020320h	;_Mov9ToOP1
+	;call 002050Ch	;_ChkFindSym
+	;call 0020588h	;_DelVar
+	jp 002120Ch	;_ErrCustom1
 	ret
 main4cpmemu_2:
-	call 0020588h	;_DelVar
+	;call 0020588h	;_DelVar
 	jp main4cpmemu_1
 backupcpmram:
 	ld hl,0d00000h
@@ -249,11 +274,12 @@ biossize:	.equ biosend-biosstart
 .assume ADL=1
 
 bios_adl_boot:
+;lplp_4_wboot:	jr lplp_4_wboot
 	;out0 (3),a
 	ld a,0
-	ld (4),a
+	ld.sis (4),a
 	ld a,095h
-	ld (3),a
+	ld.sis (3),a
 	jp bios_adl_wboot
 	ret.l
 bios_adl_wboot:
@@ -275,6 +301,8 @@ bios_adl_wboot_1:
 	ld (disksec+1),a
 	ld (disksec+2),a
 	call.lil bios_adl_read
+	and a,a
+	jr nz,bios_adl_wboot_2
 	inc c
 	ld a,l
 	add a,080h
@@ -283,6 +311,7 @@ bios_adl_wboot_1:
 	adc a,0
 	ld h,a
 	djnz bios_adl_wboot_1
+bios_adl_wboot_2:
 	ld bc,(cpmsize-1)
 	ld c,128
 	mlt bc
@@ -303,7 +332,8 @@ bios_adl_wboot_1:
 	ld.sis (5),a
 	ld.sis (6),hl
 	ld.sis sp,0080h
-	ld.sis c,(4)
+	ld.sis a,(4)
+	ld c,a
 	ld hl,(cpmbegin)
 	ret.l
 bios_adl_const:
@@ -425,7 +455,41 @@ bios_adl_conout_crt:
 	ld (ixiybak+9),iy
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
+	cp a,0ah
+	jr z,bios_adl_conout_crt_lf
+	cp a,0dh
+	jr z,bios_adl_conout_crt_cr
 	call 0207b8h	;PutC
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	ret.l
+bios_adl_conout_crt_cr:
+	ld a,0
+	ld (0D00596h),a	;curCol
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	ret.l
+bios_adl_conout_crt_lf:
+	ld a,(0D00595h)	;curRow
+	inc a
+	ld (0D00595h),a	;curRow
+	cp a,7
+	jr nc,bios_adl_conout_crt_lf_skp
+	ld a,7
+	ld (0D00595h),a	;curRow
+	ld a,15
+	ld (0D00596h),a	;curCol
+	ld a,32
+	call 0207b8h	;PutC
+bios_adl_conout_crt_lf_skp:
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
@@ -470,7 +534,7 @@ bios_adl_home:
 bios_adl_seldsk:
 	ld a,c
 	and a,a
-	jr z,bios_adl_seldsk_err
+	jr nz,bios_adl_seldsk_err
 	ld.sis hl,dpbase
 	ret.l
 bios_adl_seldsk_err:
@@ -486,6 +550,7 @@ bios_adl_setdma:
 	ld (diskdma),bc
 	ret.l
 bios_adl_read:
+	di
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
@@ -521,8 +586,15 @@ bios_adl_read:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
-	jp c,bios_adl_rw_error
+	ld (0D0257Bh),hl	;tSymPtr1
+	jp c,bios_adl_read_ramdisk
+	;jp c,bios_adl_rw_error
+	call 0021F98h	;_ChkInRam
+	jr z,bios_adl_read_inram
 	call 0021448h	;_Arc_Unarc
+bios_adl_read_inram:
+	ld hl,objname4dimg
+	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	ex de,hl
 	ld de,dmabuff
@@ -531,12 +603,6 @@ bios_adl_read:
 	ex de,hl
 	call 002050Ch	;_ChkFindSym
 	call 0021448h	;_Arc_Unarc
-	ld hl,dmabuff
-	ld a,mb
-	ld (diskdma+2),a
-	ld de,(diskdma)
-	ld bc,128
-	ldir
 
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
@@ -544,12 +610,22 @@ bios_adl_read:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+
+	ld hl,dmabuff
+	ld a,mb
+	ld (diskdma+2),a
+	ld de,(diskdma)
+	ld bc,128
+	ldir
+
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	xor a,a
+	ei
 	ret.l
 bios_adl_rw_error:
+;lplp_diskroutine:	jr lplp_diskroutine
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
@@ -560,11 +636,57 @@ bios_adl_rw_error:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ld a,0ffh
+	ei
+	ret.l
+bios_adl_read_ramdisk:
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+
+	ld hl,0
+	ld a,(disktrk)
+	ld h,a
+	ld a,(disksec)
+	ld l,a
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	ld bc,cpmbtl
+	add hl,bc
+
+	ld bc,128
+	ld a,mb
+	ld (diskdma+2),a
+	ld de,(diskdma)
+;lplp4ramdisk:	jr lplp4ramdisk
+	ldir
+
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	ld a,0h
+	ei
 	ret.l
 bios_adl_write:
+	di
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+
+	ld de,dmabuff
+	ld a,mb
+	ld (diskdma+2),a
+	ld hl,(diskdma)
+	ld bc,128
+	ldir
+
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -594,18 +716,18 @@ bios_adl_write:
 	call dec2hex
 	ld (objname4dimg+5),a
 
-	ld de,dmabuff
-	ld a,mb
-	ld (diskdma+2),a
-	ld hl,(diskdma)
-	ld bc,128
-	ldir
-
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
-	jp c,bios_adl_rw_error
+	ld (0D0257Bh),hl	;tSymPtr1
+	jp c,bios_adl_write_ramdisk
+	;jp c,bios_adl_rw_error
+	call 0021F98h	;_ChkInRam
+	jr z,bios_adl_write_inram
 	call 0021448h	;_Arc_Unarc
+bios_adl_write_inram:
+	ld hl,objname4dimg
+	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	ld hl,dmabuff
 	ld bc,128
@@ -623,7 +745,46 @@ bios_adl_write:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	xor a,a
+	ei
 	ret.l
+bios_adl_write_ramdisk:
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+
+	ld hl,0
+	ld a,(disktrk)
+	ld h,a
+	ld a,(disksec)
+	ld l,a
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	add hl,hl
+	ld bc,cpmbtl
+	add hl,bc
+
+	ld bc,128
+	ld a,mb
+	ld (diskdma+2),a
+	ld de,(diskdma)
+	ex de,hl
+	ldir
+	ex de,hl
+
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	ld a,0h
+	ei
+	ret.l
+
 bios_adl_listst:
 	ld.sis a,(3)
 	rrca
@@ -803,3 +964,9 @@ backupeddata16384:	.equ 0d20000h
 backupeddata16384_2:	.equ 0d30000h
 ;.fill 16384
 
+cpmbtl:
+.db 0c3h
+.dw 0fa00h
+.fill 128-3
+cpm62k:
+#include "CPM.SYS.ASM"
