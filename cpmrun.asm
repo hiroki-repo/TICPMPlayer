@@ -628,6 +628,8 @@ bios_adl_read_inram:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
+	inc de
+	inc de
 	ex de,hl
 	ld de,dmabuff
 	ld bc,128
@@ -762,6 +764,8 @@ bios_adl_write_inram:
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	ld (0D0257Bh),hl	;tSymPtr1
+	inc de
+	inc de
 	ld hl,dmabuff
 	ld bc,128
 	ldir
@@ -793,6 +797,8 @@ bios_adl_write_newfile_1:
 	ld hl,128
 	ld a,015h
 	call 0021338h	;_CreateVar
+	inc de
+	inc de
 	ld hl,dmabuff
 	ld bc,128
 	call 002050Ch	;_ChkFindSym
