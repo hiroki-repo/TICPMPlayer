@@ -398,6 +398,8 @@ bios_adl_conin_crt_1:
 	ld a,(hl)
 	cp a,255
 	jr z,bios_adl_conin_crt_3
+	cp a,254
+	jp z,bios_adl_conin_crt_4
 	ret.l
 bios_adl_conin_crt_2:
 	call backupcpmram
@@ -433,6 +435,30 @@ bios_adl_conin_crt_3:
 	or a,a
 	jr z,bios_adl_conin_crt_3
 	ld hl,bios_adl_ksc_2
+	ld bc,0
+	ld c,a
+	add hl,bc
+	ld a,(hl)
+	cp a,255
+	jp z,bios_adl_conin_crt_2
+	ret.l
+bios_adl_conin_crt_4:
+	call backupcpmram
+	call restorecpmram_2
+	ld (ixiybak+6),ix
+	ld (ixiybak+9),iy
+	ld ix,(ixiybak+0)
+	ld iy,(ixiybak+3)
+	call 02014ch	;GetCSC
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	or a,a
+	jr z,bios_adl_conin_crt_4
+	ld hl,bios_adl_ksc_3
 	ld bc,0
 	ld c,a
 	add hl,bc
@@ -484,14 +510,14 @@ bios_adl_conout_crt_cr:
 	call restorecpmram
 	ret.l
 bios_adl_conout_crt_lf:
-	ld a,(0D00595h)	;curRow
-	inc a
-	ld (0D00595h),a	;curRow
-	cp a,6
-	jr nc,bios_adl_conout_crt_lf_skp
-	ld a,6
-	ld (0D00595h),a	;curRow
-	ld a,14
+	;ld a,(0D00595h)	;curRow
+	;inc a
+	;ld (0D00595h),a	;curRow
+	;cp a,6
+	;jr nc,bios_adl_conout_crt_lf_skp
+	;ld a,6
+	;ld (0D00595h),a	;curRow
+	ld a,25
 	ld (0D00596h),a	;curCol
 	ld a,32
 	call 0207b8h	;PutC
@@ -726,7 +752,8 @@ bios_adl_write:
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	ld (0D0257Bh),hl	;tSymPtr1
-	jp c,bios_adl_write_ramdisk
+	jp c,bios_adl_write_newfile
+	;jp c,bios_adl_write_ramdisk
 	;jp c,bios_adl_rw_error
 	call 0021F98h	;_ChkInRam
 	jr z,bios_adl_write_inram
@@ -741,6 +768,36 @@ bios_adl_write_inram:
 	call 002050Ch	;_ChkFindSym
 	call 0021448h	;_Arc_Unarc
 	
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	xor a,a
+	ei
+	ret.l
+bios_adl_write_newfile:
+	ld hl,objname4dimg
+	call 0020320h	;_Mov9ToOP1
+	call 002050Ch	;_ChkFindSym
+	ld (0D0257Bh),hl	;tSymPtr1
+	jr c,bios_adl_write_newfile_1
+	call 0021434h	;_DelVarArc
+bios_adl_write_newfile_1:
+	ld hl,128
+	ld a,015h
+	call 0021338h	;_CreateVar
+	ld hl,dmabuff
+	ld bc,128
+	call 002050Ch	;_ChkFindSym
+	call 0021F98h	;_ChkInRam
+	jr nz,bios_adl_write_newfile_2
+	call 0021448h	;_Arc_Unarc
+bios_adl_write_newfile_2:
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
@@ -898,8 +955,8 @@ buff4sc:
 .db 0
 
 bios_adl_ksc:
-.db 000,028,029,030,031,013,013,000,000,013,043,045,042,047,000,008
-.db 000,000,051,054,057,041,000,000,000,000,050,053,056,040,000,000
+.db 000,028,029,030,031,013,013,000,000,013,043,045,042,047,094,008
+.db 000,000,051,054,057,041,000,000,000,046,050,053,056,040,000,003
 .db 032,048,049,052,055,044,000,000,000,000,000,000,000,000,000,000
 .db 255,000,000,000,000,000,254,000,000,000,000,000,000,000,000,000
 .db 003,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
@@ -931,6 +988,24 @@ bios_adl_ksc_2:
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,123,125,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+bios_adl_ksc_3:
+.db 000,000,000,000,000,000,000,000,000,000,000,093,091,000,000,000
+.db 000,000,000,000,000,125,000,000,000,000,000,000,000,123,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,026,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+
 
 dec2hex:
 	and a,0fh
