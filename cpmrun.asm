@@ -113,13 +113,13 @@ restorecpmram:
 backupcpmram_2:
 	ld hl,0d00000h
 	ld de,(ptr4allocedmem+3)
-	ld bc,65536
+	ld bc,32768;65536
 	ldir
 	ret
 restorecpmram_2:
 	ld hl,(ptr4allocedmem+3)
 	ld de,0d00000h
-	ld bc,65536
+	ld bc,32768;65536
 	ldir
 	ret
 
@@ -657,7 +657,6 @@ bios_adl_read_inram:
 	ei
 	ret.l
 bios_adl_rw_error:
-;lplp_diskroutine:	jr lplp_diskroutine
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
@@ -762,9 +761,12 @@ bios_adl_write_inram:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
+	ld (0D0257Bh),hl	;tSymPtr1
 	ld hl,dmabuff
 	ld bc,128
 	ldir
+	ld hl,objname4dimg
+	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	call 0021448h	;_Arc_Unarc
 	
@@ -796,6 +798,10 @@ bios_adl_write_newfile_1:
 	call 002050Ch	;_ChkFindSym
 	call 0021F98h	;_ChkInRam
 	jr nz,bios_adl_write_newfile_2
+;lplp_diskroutine:	jr lplp_diskroutine
+	ld hl,objname4dimg
+	call 0020320h	;_Mov9ToOP1
+	call 002050Ch	;_ChkFindSym
 	call 0021448h	;_Arc_Unarc
 bios_adl_write_newfile_2:
 	ld (ixiybak+0),ix
@@ -1040,14 +1046,15 @@ backup4bcdehl:
 
 #include "cpu_static.asm"
 
-backupeddata16384:	.equ 0d20000h
-;.fill 16384
-backupeddata16384_2:	.equ 0d30000h
-;.fill 16384
-
 cpmbtl:
 .db 0c3h
 .dw 0fa00h
 .fill 128-3
 cpm62k:
 #include "CPM.SYS.ASM"
+
+backupeddata16384:	.equ $;0d20000h
+;.fill 65536
+backupeddata16384_2:	.equ ($+65536);0d30000h
+;.fill 8192
+.fill 010000h-($-0d1a881h)-2-04000h
