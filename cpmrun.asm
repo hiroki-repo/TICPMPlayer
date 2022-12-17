@@ -801,6 +801,7 @@ bios_adl_write_newfile_1:
 	inc de
 	ld hl,dmabuff
 	ld bc,128
+	ldir
 	call 002050Ch	;_ChkFindSym
 	call 0021F98h	;_ChkInRam
 	jr nz,bios_adl_write_newfile_2
