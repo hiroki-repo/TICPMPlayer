@@ -5,6 +5,7 @@ _em180:
 	ld (em180_ixiybak+0),ix
 	ld (em180_ixiybak+3),iy
 em180_fetch:
+	ei
 	ld a,000h
 	ld (em180_opctmp+0),a
 	ld (em180_opctmp+1),a
@@ -613,6 +614,7 @@ em180_op_c0_ff_edpf_40_7f_2:
 	jp em180_exec_trcode
 
 em180_exec_trcode:
+	di
 	ld (em180_stack4z80inst+(3*11)),hl
 	ld hl,(em180_stack4z80inst+(3*10))
 	ld.sis sp,hl
