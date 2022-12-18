@@ -8,7 +8,7 @@ repeat (strsize2/128)
 bload fname,disktmp,128,128*cnt
 if (strmid(disktmp,0,128)!=strmid(datae54skp,0,128)){
 dataname="CPM0"+strf("%04X",cnt)
-datasize=130
+datasize=128
 sdim data,0x4a+datasize+2
 wpoke data,0,0x2a2a
 lpoke data,2,0x33384954
@@ -23,7 +23,7 @@ memcpy data,dataname,strlen(dataname),0x3c,0
 poke data,0x45,0x80
 wpoke data,0x46,wpeek(data,0x39)
 wpoke data,0x48,wpeek(data,0x39)-2
-memcpy data,disktmp,128,0x4c,0
+memcpy data,disktmp,128,0x4a,0
 cs=0
 repeat varsize(data)-2-55:cs+=peek(data,cnt+55):loop
 wpoke data,varsize(data)-2,cs
