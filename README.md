@@ -5,7 +5,7 @@ is a CP/M emulator for TI-84PCE!
 
 1, Download "CPMRUN.8xp", but not "cpmrun.8xp".
 
-2, Download "generatedimg.zip" and unzip it to generatedimg folder or directory.
+2, Download "generatedimg.zip" and unzip it to "generatedimg" folder or directory.
 
 3, Transfer them("CPMRUN.8xp" and "CPM0XXXX.8xv") to your TI-84 Plus CE.
 
