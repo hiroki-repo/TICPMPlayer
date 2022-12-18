@@ -92,7 +92,7 @@ notfound:
 	;call 0020320h	;_Mov9ToOP1
 	;call 002050Ch	;_ChkFindSym
 	;call 0020588h	;_DelVar
-	jp 002120Ch	;_ErrCustom1
+	;jp 002120Ch	;_ErrCustom1
 	ret
 main4cpmemu_2:
 	;call 0020588h	;_DelVar
