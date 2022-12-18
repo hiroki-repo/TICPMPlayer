@@ -509,11 +509,45 @@ bios_adl_conout_crt:
 	ld (ixiybak+9),iy
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
+	cp a,08h
+	jp z,bios_adl_conout_crt_bs
 	cp a,0ah
-	jr z,bios_adl_conout_crt_lf
+	jp z,bios_adl_conout_crt_lf
 	cp a,0dh
-	jr z,bios_adl_conout_crt_cr
+	jp z,bios_adl_conout_crt_cr
 	call 0207b8h	;PutC
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	ret.l
+bios_adl_conout_crt_bs:
+	ld a,(0D00596h)	;curCol
+	dec a
+	cp a,0ffh
+	jr bios_adl_conout_crt_bs_pl
+	ld (0D00596h),a	;curCol
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	ret.l
+bios_adl_conout_crt_bs_pl:
+	ld a,25
+	ld (0D00596h),a	;curCol
+	ld a,(0D00595h)	;curRow
+	dec a
+	ld (0D00595h),a	;curRow
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
