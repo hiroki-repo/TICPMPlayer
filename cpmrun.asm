@@ -349,6 +349,9 @@ bios_adl_const_tty:
 	ld a,0h
 	ret.l
 bios_adl_const_crt:
+	ld (backup4bcdehl+(3*0)),bc
+	ld (backup4bcdehl+(3*1)),de
+	ld (backup4bcdehl+(3*2)),hl
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -362,6 +365,9 @@ bios_adl_const_crt:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
 	ld (buff4sc),a
 	or a,a
 	jr z,bios_adl_const_crt_1
@@ -383,6 +389,9 @@ bios_adl_conin_tty:
 	ld a,0h
 	ret.l
 bios_adl_conin_crt:
+	ld (backup4bcdehl+(3*0)),bc
+	ld (backup4bcdehl+(3*1)),de
+	ld (backup4bcdehl+(3*2)),hl
 	ld a,(buff4sc)
 	or a,a
 	jr z,bios_adl_conin_crt_2
@@ -400,6 +409,9 @@ bios_adl_conin_crt_1:
 	jr z,bios_adl_conin_crt_3
 	cp a,254
 	jp z,bios_adl_conin_crt_4
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_conin_crt_2:
 	call backupcpmram
@@ -441,6 +453,9 @@ bios_adl_conin_crt_3:
 	ld a,(hl)
 	cp a,255
 	jp z,bios_adl_conin_crt_2
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_conin_crt_4:
 	call backupcpmram
@@ -465,6 +480,9 @@ bios_adl_conin_crt_4:
 	ld a,(hl)
 	cp a,255
 	jp z,bios_adl_conin_crt_2
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_conout:
 	ld.sis a,(3)
@@ -481,6 +499,9 @@ bios_adl_conout_tty:
 	ret.l
 bios_adl_conout_crt:
 	ld a,c
+	ld (backup4bcdehl+(3*0)),bc
+	ld (backup4bcdehl+(3*1)),de
+	ld (backup4bcdehl+(3*2)),hl
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -498,6 +519,9 @@ bios_adl_conout_crt:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_conout_crt_cr:
 	ld a,0
@@ -508,6 +532,9 @@ bios_adl_conout_crt_cr:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_conout_crt_lf:
 	;ld a,(0D00595h)	;curRow
@@ -528,6 +555,9 @@ bios_adl_conout_crt_lf_skp:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_list:
 	ld.sis a,(3)
