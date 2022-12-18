@@ -582,6 +582,7 @@ bios_adl_setdma:
 	ld (diskdma),bc
 	ret.l
 bios_adl_read:
+	di
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
@@ -657,6 +658,7 @@ bios_adl_read_inram:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	xor a,a
+	ei
 	ret.l
 bios_adl_rw_error:
 	ld (ixiybak+0),ix
@@ -669,6 +671,7 @@ bios_adl_rw_error:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ld a,0ffh
+	ei
 	ret.l
 bios_adl_read_ramdisk:
 	ld (ixiybak+0),ix
@@ -707,6 +710,7 @@ bios_adl_read_ramdisk:
 	ei
 	ret.l
 bios_adl_write:
+	di
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
@@ -782,6 +786,7 @@ bios_adl_write_inram:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	xor a,a
+	ei
 	ret.l
 bios_adl_write_newfile:
 	ld hl,objname4dimg
@@ -818,6 +823,7 @@ bios_adl_write_newfile_2:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	xor a,a
+	ei
 	ret.l
 bios_adl_write_ramdisk:
 	ld (ixiybak+0),ix
@@ -854,6 +860,7 @@ bios_adl_write_ramdisk:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ld a,0h
+	ei
 	ret.l
 
 bios_adl_listst:
