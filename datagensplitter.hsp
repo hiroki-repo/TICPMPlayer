@@ -1,0 +1,34 @@
+#runtime "hsp3cl"
+sdim datae54skp,129
+memset datae54skp,0xe5,128,0
+fname="cpm.img"
+sdim disktmp,129
+exist fname:strsize2=strsize
+repeat (strsize2/128)
+bload fname,disktmp,128,128*cnt
+if (strmid(disktmp,0,128)!=strmid(datae54skp,0,128)){
+dataname="CPM0"+strf("%04X",cnt)
+datasize=130
+sdim data,0x4a+datasize+2
+wpoke data,0,0x2a2a
+lpoke data,2,0x33384954
+poke data,6,0x46
+lpoke data,7,0x000a1a2a
+poke data,11,'A'
+wpoke data,0x35,0x13+datasize
+poke data,0x37,0x0d
+wpoke data,0x39,datasize+2
+poke data,0x3b,0x15
+memcpy data,dataname,strlen(dataname),0x3c,0
+poke data,0x45,0x80
+wpoke data,0x46,wpeek(data,0x39)
+wpoke data,0x48,wpeek(data,0x39)-2
+memcpy data,disktmp,128,0x4c,0
+cs=0
+repeat varsize(data)-2-55:cs+=peek(data,cnt+55):loop
+wpoke data,varsize(data)-2,cs
+bsave "generatedimg\\"+dataname+".8xv",data
+mes "Saved \"generatedimg\\"+dataname+".8xv\""
+}
+loop
+end
