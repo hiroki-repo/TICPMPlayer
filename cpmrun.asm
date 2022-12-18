@@ -530,7 +530,7 @@ bios_adl_conout_crt_bs:
 	ld a,(0D00596h)	;curCol
 	dec a
 	cp a,0ffh
-	jr bios_adl_conout_crt_bs_pl
+	jr z,bios_adl_conout_crt_bs_pl
 	ld (0D00596h),a	;curCol
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
