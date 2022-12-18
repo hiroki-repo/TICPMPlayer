@@ -6,7 +6,7 @@ sdim disktmp,129
 exist fname:strsize2=strsize
 repeat (strsize2/128)
 bload fname,disktmp,128,128*cnt
-if (strmid(disktmp,0,128)!=strmid(datae54skp,0,128)){
+if (strmid(disktmp,0,128)!=strmid(datae54skp,0,128)) | ((128*cnt)>=0x8000 & (128*cnt)<0xa000){
 dataname="CPM0"+strf("%04X",cnt)
 datasize=128
 sdim data,0x4a+datasize+2
