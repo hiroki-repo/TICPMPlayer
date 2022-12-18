@@ -1,7 +1,7 @@
 # TICPMPlayer
 is a CP/M emulator for TI-84PCE!
 
-#How to use it?
+# How to use it?
 
 1, Download "CPMRUN.8xp", but not "cpmrun.8xp".
 
