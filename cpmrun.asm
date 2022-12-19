@@ -421,6 +421,10 @@ bios_adl_conin_crt_1:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ret.l
+bios_adl_conin_crt_2_reset_alpha:
+	ld a,(bios_adl_conin_crt_enableshift_flg)
+	bit 0,a
+	jp nz,bios_adl_conin_crt_enableshift
 bios_adl_conin_crt_2:
 	ld a,(bios_adl_conin_crt_enableshift_flg)
 	bit 0,a
@@ -463,7 +467,7 @@ bios_adl_conin_crt_3:
 	add hl,bc
 	ld a,(hl)
 	cp a,255
-	jp z,bios_adl_conin_crt_2
+	jp z,bios_adl_conin_crt_2_reset_alpha
 	cp a,254
 	jp z,bios_adl_conin_crt_4
 	ld bc,(backup4bcdehl+(3*0))
