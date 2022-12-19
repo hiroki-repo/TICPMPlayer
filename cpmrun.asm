@@ -325,7 +325,14 @@ bios_adl_wboot_2:
 	ex de,hl
 	ld a,0c3h
 	ld.sis (0),a
-	ld hl,0fa03h
+	ld hl,(cpmbegin);0fa03h
+	ld bc,(cpmsize-1)
+	ld c,128
+	mlt bc
+	inc bc
+	inc bc
+	inc bc
+	add hl,bc
 	ld.sis (1),hl
 	ld bc,(bdospos)
 	ld hl,(cpmbegin)
