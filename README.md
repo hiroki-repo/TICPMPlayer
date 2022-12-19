@@ -12,3 +12,11 @@ is a CP/M emulator for TI-84PCE!
 4, Execute a program named "CPMRUN" from prgm or arTIfiCE menu.
 
 5, Enjoy your CP/M-80 System on TI-84 Plus CE!
+
+# Key mapping notice
+
+[stat] --- space
+[prgm] CTRL + C
+[quit] CTRL + Z
+
+else are same code as char printed on/by the each keys If the char is an ascii code char!
