@@ -17,8 +17,8 @@ is a CP/M emulator for TI-84PCE!
 
 [stat] --- space
 
-[prgm] CTRL + C
+[prgm] --- CTRL + C
 
-[quit] CTRL + Z
+[quit] --- CTRL + Z
 
 else are same code as char printed on/by the each keys If the char is an ascii code char!
