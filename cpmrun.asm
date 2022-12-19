@@ -422,6 +422,9 @@ bios_adl_conin_crt_1:
 	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_conin_crt_2:
+	ld a,(bios_adl_conin_crt_enableshift_flg)
+	bit 0,a
+	jr nz,bios_adl_conin_crt_3
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -461,6 +464,8 @@ bios_adl_conin_crt_3:
 	ld a,(hl)
 	cp a,255
 	jp z,bios_adl_conin_crt_2
+	cp a,254
+	jp z,bios_adl_conin_crt_4
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -487,11 +492,19 @@ bios_adl_conin_crt_4:
 	add hl,bc
 	ld a,(hl)
 	cp a,255
+	jp z,bios_adl_conin_crt_enableshift
+	cp a,254
 	jp z,bios_adl_conin_crt_2
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ret.l
+bios_adl_conin_crt_enableshift:
+	ld a,(bios_adl_conin_crt_enableshift_flg)
+	xor a,1
+	ld (bios_adl_conin_crt_enableshift_flg),a
+	ld a,0
+	jp bios_adl_conin_crt_2
 bios_adl_conout:
 	ld.sis a,(3)
 	and a,3
@@ -648,7 +661,7 @@ bios_adl_home:
 	ret.l
 bios_adl_seldsk:
 	ld a,c
-	and a,a
+	and a,0fh
 	jr nz,bios_adl_seldsk_err
 	ld.sis hl,dpbase
 	ret.l
@@ -1065,7 +1078,7 @@ bios_adl_ksc_2:
 .db 000,000,000,000,000,000,000,000,000,000,034,087,082,077,072,000
 .db 000,063,000,086,081,076,071,000,000,058,090,085,080,075,070,067
 .db 000,095,089,084,079,074,069,066,000,066,088,083,078,073,068,065
-.db 255,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 255,000,000,000,000,000,254,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
@@ -1082,7 +1095,7 @@ bios_adl_ksc_3:
 .db 000,000,000,000,000,000,000,000,000,000,000,093,091,000,000,000
 .db 000,000,000,000,000,125,000,000,000,000,000,000,000,123,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
-.db 000,000,000,000,000,000,000,026,000,000,000,000,000,000,000,000
+.db 255,000,000,000,000,000,254,026,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
@@ -1127,6 +1140,9 @@ backup4bcdehl:
 .dl 0
 .dl 0
 .dl 0
+
+bios_adl_conin_crt_enableshift_flg:
+.db 0
 
 #include "cpu_static.asm"
 
