@@ -16,7 +16,9 @@ is a CP/M emulator for TI-84PCE!
 # Key mapping notice
 
 [stat] --- space
+
 [prgm] CTRL + C
+
 [quit] CTRL + Z
 
 else are same code as char printed on/by the each keys If the char is an ascii code char!
