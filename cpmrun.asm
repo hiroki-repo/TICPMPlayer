@@ -515,6 +515,11 @@ bios_adl_conout_crt:
 	jp z,bios_adl_conout_crt_lf
 	cp a,0dh
 	jp z,bios_adl_conout_crt_cr
+	cp a,05bh
+	jp z,bios_adl_conout_crt_5b
+	cp a,0c1h
+	jp z,bios_adl_conout_crt_c1
+bios_adl_conout_crt_show4proced:
 	call 0207b8h	;PutC
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
@@ -526,6 +531,12 @@ bios_adl_conout_crt:
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ret.l
+bios_adl_conout_crt_5b:
+	ld a,0c1h
+	jp bios_adl_conout_crt_show4proced
+bios_adl_conout_crt_c1:
+	ld a,05bh
+	jp bios_adl_conout_crt_show4proced
 bios_adl_conout_crt_bs:
 	ld a,(0D00596h)	;curCol
 	dec a
