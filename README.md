@@ -23,4 +23,8 @@ is a CP/M emulator for TI-84PCE!
 
 [clear] --- backspace
 
+[solve] --- equal
+
+[(-)] --- Atmark
+
 else are same code as char printed on/by the each keys, If the char is an ascii code char, but otherwise are null(CTRL + @)!
