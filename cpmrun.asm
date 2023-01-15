@@ -272,6 +272,62 @@ addrbeepconf:.db 00h
 biosend:
 biossize:	.equ biosend-biosstart
 .org buffer4trampoline+(biosend-biosstart)
+.assume ADL=0
+bios_z80_ttyout_:
+	ld b,0
+	out0 (0Ch),b
+	ld b,1
+	out0 (0Ch),b
+	ld c,8
+	nop
+	nop
+	nop
+bios_z80_ttyout__:
+	out0 (0Ch),a
+	srl a
+	dec c
+	jr nz,bios_z80_ttyout__
+	ld b,0
+	out0 (0Ch),b
+	ret.l
+bios_z80_ttyst_:
+	ld de,1
+	ld hl, $FFFF - $5000
+bios_z80_ttyst__:
+	add hl,de
+	jr c,bios_z80_ttyst_0
+	in0 b,(0Bh)
+	bit 0,b
+	jr z,bios_z80_ttyst__
+	ld a,0ffh
+	ret.l
+bios_z80_ttyst_0:
+	ld a,00h
+	ret.l
+bios_z80_ttyin_:
+	in0 b,(0Bh)
+	bit 0,b
+	jr nz,bios_z80_ttyin_
+	ld b,2
+	nop
+	nop
+	nop
+bios_z80_ttyin__:
+	in0 a,(0Bh)
+	and a,1
+	or a,b
+	ld b,a
+	sla b
+	jr nc,bios_z80_ttyin__
+	nop
+	in0 a,(0Bh)
+	and a,1
+	or a,b
+	ld b,a
+	nop
+	nop
+	ld a,b
+	ret.l
 .assume ADL=1
 
 bios_adl_boot:
@@ -354,7 +410,26 @@ bios_adl_const:
 	jp z,bios_adl_listst
 	ret.l
 bios_adl_const_tty:
-	ld a,0h
+	;ld a,0h
+	di
+	ld a,mb
+	ld (bios_backup_of_mbase_and_nmihndler+0),a
+	ld.sis hl,(0066h)
+	ld (bios_backup_of_mbase_and_nmihndler+1),hl
+	
+	ld a, bios_z80_ttyout_ >> 16
+	ld mb,a
+	ld hl,045edh
+	ld.sis (0066h),hl
+	call.sis bios_z80_ttyout_ & 0ffffh
+	ld c,a
+	
+	ld hl,(bios_backup_of_mbase_and_nmihndler+1)
+	ld.sis (0066h),hl
+	ld a,(bios_backup_of_mbase_and_nmihndler+0)
+	ld mb,a
+	ei
+	ld a,c
 	ret.l
 bios_adl_const_crt:
 	ld (backup4bcdehl+(3*0)),bc
@@ -394,7 +469,26 @@ bios_adl_conin:
 	jp z,bios_adl_reader
 	ret.l
 bios_adl_conin_tty:
-	ld a,0h
+	di
+	ld a,mb
+	ld (bios_backup_of_mbase_and_nmihndler+0),a
+	ld.sis hl,(0066h)
+	ld (bios_backup_of_mbase_and_nmihndler+1),hl
+	
+	ld a, bios_z80_ttyout_ >> 16
+	ld mb,a
+	ld hl,045edh
+	ld.sis (0066h),hl
+	call.sis bios_z80_ttyin_ & 0ffffh
+	ld c,a
+	
+	ld hl,(bios_backup_of_mbase_and_nmihndler+1)
+	ld.sis (0066h),hl
+	ld a,(bios_backup_of_mbase_and_nmihndler+0)
+	ld mb,a
+	ei
+	ld a,c
+	;ld a,0h
 	ret.l
 bios_adl_conin_crt:
 	ld (backup4bcdehl+(3*0)),bc
@@ -520,7 +614,25 @@ bios_adl_conout:
 	;out0 (4),c
 	ret.l
 bios_adl_conout_tty:
+	;ld a,c
+	di
+	ld a,mb
+	ld (bios_backup_of_mbase_and_nmihndler+0),a
+	ld.sis hl,(0066h)
+	ld (bios_backup_of_mbase_and_nmihndler+1),hl
+	
+	ld a, bios_z80_ttyout_ >> 16
+	ld mb,a
+	ld hl,045edh
+	ld.sis (0066h),hl
 	ld a,c
+	call.sis bios_z80_ttyout_ & 0ffffh
+	
+	ld hl,(bios_backup_of_mbase_and_nmihndler+1)
+	ld.sis (0066h),hl
+	ld a,(bios_backup_of_mbase_and_nmihndler+0)
+	ld mb,a
+	ei
 	ret.l
 bios_adl_conout_crt:
 	ld a,c
@@ -1147,6 +1259,11 @@ backup4bcdehl:
 
 bios_adl_conin_crt_enableshift_flg:
 .db 0
+
+
+bios_backup_of_mbase_and_nmihndler:
+.db 0
+.dl 0
 
 #include "cpu_static.asm"
 
