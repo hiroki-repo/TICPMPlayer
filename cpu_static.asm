@@ -578,13 +578,15 @@ em180_op_c0_ff_edpf_00_3f:
 	jp em180_exec_trcode
 em180_op_c0_ff_edpf_40_7f:
 	ld a,(em180_opctmp+1)
+	cp a,044h
+	jp z,em180_exec_trcode
 	cp a,054h
 	jp z,em180_op_ixypf_opt1_1
 	cp a,055h
 	jp z,em180_op_ixypf_opt1_1
-	cp a,056h
-	jp z,em180_op_ixypf_opt1_1
 	cp a,065h
+	jp z,em180_op_ixypf_opt1_1
+	cp a,066h
 	jp z,em180_op_ixypf_opt1_1
 	and a,7
 	cp a,3
