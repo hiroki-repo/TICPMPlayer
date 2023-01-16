@@ -276,8 +276,6 @@ biossize:	.equ biosend-biosstart
 bios_z80_ttyout_:
 	ld b,0
 	out0 (0Ch),b
-	ld b,1
-	out0 (0Ch),b
 	ld c,8
 	nop
 	nop
@@ -287,7 +285,7 @@ bios_z80_ttyout__:
 	srl a
 	dec c
 	jr nz,bios_z80_ttyout__
-	ld b,0
+	ld b,1
 	out0 (0Ch),b
 	ret.l
 bios_z80_ttyst_:
@@ -298,27 +296,19 @@ bios_z80_ttyst__:
 	jr c,bios_z80_ttyst_0
 	in0 b,(0Bh)
 	bit 0,b
-	jr z,bios_z80_ttyst__
-	ld a,0ffh
-	ret.l
-bios_z80_ttyst_0:
-	ld a,00h
-	ret.l
-bios_z80_ttyin_:
-	in0 b,(0Bh)
-	bit 0,b
-	jr nz,bios_z80_ttyin_
+	jr nz,bios_z80_ttyst__
+	
+	or a,a
 	ld b,2
 	nop
 	nop
-	nop
-bios_z80_ttyin__:
+bios_z80_ttyst___:
 	in0 a,(0Bh)
 	and a,1
 	or a,b
 	ld b,a
 	sla b
-	jr nc,bios_z80_ttyin__
+	jr nc,bios_z80_ttyst___
 	nop
 	in0 a,(0Bh)
 	and a,1
@@ -327,7 +317,52 @@ bios_z80_ttyin__:
 	nop
 	nop
 	ld a,b
+	in0 b,(0Bh)
+	
+	ld ((bios_z80_ttybuffer&0ffffh) + 0),a
+	ld a,1
+	ld ((bios_z80_ttybuffer&0ffffh) + 1),a
+	ld a,0ffh
 	ret.l
+bios_z80_ttyst_0:
+	ld a,00h
+	ret.l
+bios_z80_ttyin_:
+	ld a,((bios_z80_ttybuffer&0ffffh) + 1)
+	bit 0,a
+	jr z,bios_z80_ttyin__
+	xor a,a
+	ld ((bios_z80_ttybuffer&0ffffh) + 1),a
+	ld a,((bios_z80_ttybuffer&0ffffh) + 0)
+	ret.l
+bios_z80_ttyin__:
+	in0 b,(0Bh)
+	bit 0,b
+	jr nz,bios_z80_ttyin__
+	or a,a
+	ld b,2
+	nop
+	nop
+bios_z80_ttyin___:
+	in0 a,(0Bh)
+	and a,1
+	or a,b
+	ld b,a
+	sla b
+	jr nc,bios_z80_ttyin___
+	nop
+	in0 a,(0Bh)
+	and a,1
+	or a,b
+	ld b,a
+	nop
+	nop
+	ld a,b
+	in0 b,(0Bh)
+	ret.l
+bios_z80_ttybuffer:
+.db 0
+.db 0
 .assume ADL=1
 
 bios_adl_boot:
