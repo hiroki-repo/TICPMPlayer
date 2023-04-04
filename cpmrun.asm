@@ -761,10 +761,11 @@ bios_adl_conout_crt_lf:
 	;jr nc,bios_adl_conout_crt_lf_skp
 	;ld a,6
 	;ld (0D00595h),a	;curRow
-	ld a,25
-	ld (0D00596h),a	;curCol
-	ld a,32
-	call 0207b8h	;PutC
+	;ld a,25
+	;ld (0D00596h),a	;curCol
+	;ld a,32
+	;call 0207b8h	;PutC
+	call 00207F0h	;_NewLine
 bios_adl_conout_crt_lf_skp:
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
