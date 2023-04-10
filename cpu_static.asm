@@ -6,6 +6,7 @@ _em180:
 	ld (em180_ixiybak+3),iy
 em180_fetch:
 	ei
+	di
 	ld a,000h
 	ld (em180_opctmp+0),a
 	ld (em180_opctmp+1),a
