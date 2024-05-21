@@ -706,6 +706,7 @@ bios_adl_conout_crt:
 	jp z,bios_adl_conout_crt_c1
 bios_adl_conout_crt_show4proced:
 	call 0207b8h	;PutC
+	di
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
