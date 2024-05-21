@@ -480,6 +480,7 @@ bios_adl_const_crt:
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
 	call 02014ch	;GetCSC
+	di
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
@@ -785,6 +786,7 @@ bios_adl_conout_crt_lf:
 	;ld a,32
 	;call 0207b8h	;PutC
 	call 00207F0h	;_NewLine
+	di
 bios_adl_conout_crt_lf_skp:
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
@@ -890,8 +892,10 @@ bios_adl_read:
 	jp c,bios_adl_read_ramdisk
 	;jp c,bios_adl_rw_error
 	call 0021F98h	;_ChkInRam
+	di
 	jr z,bios_adl_read_inram
 	call 0021448h	;_Arc_Unarc
+	di
 bios_adl_read_inram:
 	di
 	ld hl,objname4dimg
@@ -1030,8 +1034,10 @@ bios_adl_write:
 	;jp c,bios_adl_write_ramdisk
 	;jp c,bios_adl_rw_error
 	call 0021F98h	;_ChkInRam
+	di
 	jr z,bios_adl_write_inram
 	call 0021448h	;_Arc_Unarc
+	di
 bios_adl_write_inram:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
