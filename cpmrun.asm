@@ -463,13 +463,19 @@ bios_adl_const_tty:
 	ld.sis (0066h),hl
 	ld a,(bios_backup_of_mbase_and_nmihndler+0)
 	ld mb,a
-	ei
+	di
 	ld a,c
 	ret.l
 bios_adl_const_crt:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	push af
+	pop hl
+	ld (backup4bcdehl+(3*3)),hl
+	ld a,(buff4sc)
+	or a,a
+	jr nz,bios_adl_const_crt_
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -483,12 +489,14 @@ bios_adl_const_crt:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	di
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ld (buff4sc),a
 	or a,a
 	jr z,bios_adl_const_crt_1
+bios_adl_const_crt_:
 	ld a,0ffh
 	ret.l
 bios_adl_const_crt_1:
@@ -521,7 +529,7 @@ bios_adl_conin_tty:
 	ld.sis (0066h),hl
 	ld a,(bios_backup_of_mbase_and_nmihndler+0)
 	ld mb,a
-	ei
+	di
 	ld a,c
 	;ld a,0h
 	ret.l
@@ -529,6 +537,9 @@ bios_adl_conin_crt:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	push af
+	pop hl
+	ld (backup4bcdehl+(3*3)),hl
 	ld a,(buff4sc)
 	or a,a
 	jr z,bios_adl_conin_crt_2
@@ -546,6 +557,7 @@ bios_adl_conin_crt_1:
 	jr z,bios_adl_conin_crt_3
 	cp a,254
 	jp z,bios_adl_conin_crt_4
+	di
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -555,25 +567,27 @@ bios_adl_conin_crt_2_reset_alpha:
 	bit 0,a
 	jp nz,bios_adl_conin_crt_enableshift
 bios_adl_conin_crt_2:
-	ld a,(bios_adl_conin_crt_enableshift_flg)
-	bit 0,a
-	jr nz,bios_adl_conin_crt_3
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
 	ld (ixiybak+9),iy
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
+bios_adl_conin_crt_2_:
+	ld a,(bios_adl_conin_crt_enableshift_flg)
+	bit 0,a
+	jr nz,bios_adl_conin_crt_3
 	call 02014ch	;GetCSC
+	or a,a
+	jr z,bios_adl_conin_crt_2_
+	di
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
-	or a,a
-	jr z,bios_adl_conin_crt_2
-	jr bios_adl_conin_crt_1
+	jp bios_adl_conin_crt_1
 bios_adl_conin_crt_3:
 	call backupcpmram
 	call restorecpmram_2
@@ -581,15 +595,17 @@ bios_adl_conin_crt_3:
 	ld (ixiybak+9),iy
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
+bios_adl_conin_crt_3_:
 	call 02014ch	;GetCSC
+	or a,a
+	jr z,bios_adl_conin_crt_3_
+	di
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
-	or a,a
-	jr z,bios_adl_conin_crt_3
 	ld hl,bios_adl_ksc_2
 	ld bc,0
 	ld c,a
@@ -599,6 +615,7 @@ bios_adl_conin_crt_3:
 	jp z,bios_adl_conin_crt_2_reset_alpha
 	cp a,254
 	jp z,bios_adl_conin_crt_4
+	di
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -610,15 +627,17 @@ bios_adl_conin_crt_4:
 	ld (ixiybak+9),iy
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
+bios_adl_conin_crt_4_:
 	call 02014ch	;GetCSC
+	or a,a
+	jr z,bios_adl_conin_crt_4_
+	di
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
-	or a,a
-	jr z,bios_adl_conin_crt_4
 	ld hl,bios_adl_ksc_3
 	ld bc,0
 	ld c,a
@@ -628,6 +647,7 @@ bios_adl_conin_crt_4:
 	jp z,bios_adl_conin_crt_enableshift
 	cp a,254
 	jp z,bios_adl_conin_crt_2
+	di
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -667,13 +687,16 @@ bios_adl_conout_tty:
 	ld.sis (0066h),hl
 	ld a,(bios_backup_of_mbase_and_nmihndler+0)
 	ld mb,a
-	ei
+	di
 	ret.l
 bios_adl_conout_crt:
 	ld a,c
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	push af
+	pop hl
+	ld (backup4bcdehl+(3*3)),hl
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -698,6 +721,10 @@ bios_adl_conout_crt_show4proced:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	di
+	ld hl,(backup4bcdehl+(3*3))
+	push hl
+	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -720,6 +747,10 @@ bios_adl_conout_crt_bs:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	di
+	ld hl,(backup4bcdehl+(3*3))
+	push hl
+	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -736,6 +767,10 @@ bios_adl_conout_crt_bs_pl:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	di
+	ld hl,(backup4bcdehl+(3*3))
+	push hl
+	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -749,6 +784,10 @@ bios_adl_conout_crt_cr:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	di
+	ld hl,(backup4bcdehl+(3*3))
+	push hl
+	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -773,6 +812,10 @@ bios_adl_conout_crt_lf_skp:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	di
+	ld hl,(backup4bcdehl+(3*3))
+	push hl
+	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -833,6 +876,9 @@ bios_adl_read:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	push af
+	pop hl
+	ld (backup4bcdehl+(3*3)),hl
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -865,6 +911,7 @@ bios_adl_read:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
+	di
 	ld (0D0257Bh),hl	;tSymPtr1
 	jp c,bios_adl_read_ramdisk
 	;jp c,bios_adl_rw_error
@@ -872,9 +919,11 @@ bios_adl_read:
 	jr z,bios_adl_read_inram
 	call 0021448h	;_Arc_Unarc
 bios_adl_read_inram:
+	di
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
+	di
 	inc de
 	inc de
 	ex de,hl
@@ -886,6 +935,7 @@ bios_adl_read_inram:
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	call 0021448h	;_Arc_Unarc
+	di
 
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
@@ -911,14 +961,17 @@ bios_adl_rw_error:
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
 	ld iy,(ixiybak+9)
+	di
 	call backupcpmram_2
 	call restorecpmram
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
 	ld a,0ffh
+	or a,a
 	ret.l
 bios_adl_read_ramdisk:
+	di
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
@@ -957,6 +1010,9 @@ bios_adl_write:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	push af
+	pop hl
+	ld (backup4bcdehl+(3*3)),hl
 
 	ld de,dmabuff
 	ld a,mb
@@ -997,6 +1053,7 @@ bios_adl_write:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
+	di
 	ld (0D0257Bh),hl	;tSymPtr1
 	jp c,bios_adl_write_newfile
 	;jp c,bios_adl_write_ramdisk
@@ -1008,6 +1065,7 @@ bios_adl_write_inram:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
+	di
 	ld (0D0257Bh),hl	;tSymPtr1
 	inc de
 	inc de
@@ -1018,11 +1076,13 @@ bios_adl_write_inram:
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	call 0021448h	;_Arc_Unarc
+	di
 	
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
 	ld iy,(ixiybak+9)
+	di
 	call backupcpmram_2
 	call restorecpmram
 	ld bc,(backup4bcdehl+(3*0))
@@ -1034,6 +1094,7 @@ bios_adl_write_newfile:
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
+	di
 	ld (0D0257Bh),hl	;tSymPtr1
 	jr c,bios_adl_write_newfile_1
 	call 0021434h	;_DelVarArc
@@ -1041,6 +1102,7 @@ bios_adl_write_newfile_1:
 	ld hl,128
 	ld a,015h
 	call 0021338h	;_CreateVar
+	di
 	inc de
 	inc de
 	ld hl,dmabuff
@@ -1048,17 +1110,20 @@ bios_adl_write_newfile_1:
 	ldir
 	call 002050Ch	;_ChkFindSym
 	call 0021F98h	;_ChkInRam
+	di
 	jr nz,bios_adl_write_newfile_2
 ;lplp_diskroutine:	jr lplp_diskroutine
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	call 0021448h	;_Arc_Unarc
+	di
 bios_adl_write_newfile_2:
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
 	ld iy,(ixiybak+9)
+	di
 	call backupcpmram_2
 	call restorecpmram
 	ld bc,(backup4bcdehl+(3*0))
@@ -1067,6 +1132,7 @@ bios_adl_write_newfile_2:
 	xor a,a
 	ret.l
 bios_adl_write_ramdisk:
+	di
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 	ld ix,(ixiybak+6)
@@ -1289,6 +1355,7 @@ diskdma:
 .dl 0
 
 backup4bcdehl:
+.dl 0
 .dl 0
 .dl 0
 .dl 0
