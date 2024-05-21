@@ -1,36 +1,12 @@
 .assume ADL=1
 _em180:
-	di
 	ld (em180_spbak),sp
 	ld sp,em180_stack4prgs
 	ld (em180_ixiybak+0),ix
 	ld (em180_ixiybak+3),iy
-	exx
-	ld (em180_ixiybak+6+(3*0)),bc
-	ld (em180_ixiybak+6+(3*1)),de
-	ld (em180_ixiybak+6+(3*2)),hl
-	exx
-	ex af,af'
-	push hl
-	push af
-	pop hl
-	ld (em180_ixiybak+6+(3*3)),hl
-	pop hl
-	ex af,af'
 em180_fetch:
-	exx
-	ld bc,(em180_ixiybak+6+(3*0))
-	ld de,(em180_ixiybak+6+(3*1))
-	ld hl,(em180_ixiybak+6+(3*2))
-	exx
-	ex af,af'
-	push hl
-	ld hl,(em180_ixiybak+6+(3*3))
-	push hl
-	pop af
-	pop hl
-	ex af,af'
 	ei
+	di
 	ld a,000h
 	ld (em180_opctmp+0),a
 	ld (em180_opctmp+1),a
@@ -643,18 +619,6 @@ em180_op_c0_ff_edpf_40_7f_2:
 em180_exec_trcode:
 	di
 	ld (em180_stack4z80inst+(3*11)),hl
-	exx
-	ld (em180_ixiybak+6+(3*0)),bc
-	ld (em180_ixiybak+6+(3*1)),de
-	ld (em180_ixiybak+6+(3*2)),hl
-	exx
-	ex af,af'
-	push hl
-	push af
-	pop hl
-	ld (em180_ixiybak+6+(3*3)),hl
-	pop hl
-	ex af,af'
 	ld hl,(em180_stack4z80inst+(3*10))
 	ld.sis sp,hl
 	ld hl,(em180_stack4z80inst+(3*0))
@@ -809,9 +773,5 @@ em180_spbak:
 .dl 0
 .dl 0
 em180_ixiybak:
-.dl 0
-.dl 0
-.dl 0
-.dl 0
 .dl 0
 .dl 0
