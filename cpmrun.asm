@@ -470,9 +470,6 @@ bios_adl_const_crt:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
-	push af
-	pop hl
-	ld (backup4bcdehl+(3*3)),hl
 	ld a,(buff4sc)
 	or a,a
 	jr nz,bios_adl_const_crt_
@@ -537,9 +534,6 @@ bios_adl_conin_crt:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
-	push af
-	pop hl
-	ld (backup4bcdehl+(3*3)),hl
 	ld a,(buff4sc)
 	or a,a
 	jr z,bios_adl_conin_crt_2
@@ -694,9 +688,6 @@ bios_adl_conout_crt:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
-	push af
-	pop hl
-	ld (backup4bcdehl+(3*3)),hl
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -722,9 +713,6 @@ bios_adl_conout_crt_show4proced:
 	call backupcpmram_2
 	call restorecpmram
 	di
-	ld hl,(backup4bcdehl+(3*3))
-	push hl
-	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -748,9 +736,6 @@ bios_adl_conout_crt_bs:
 	call backupcpmram_2
 	call restorecpmram
 	di
-	ld hl,(backup4bcdehl+(3*3))
-	push hl
-	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -768,9 +753,6 @@ bios_adl_conout_crt_bs_pl:
 	call backupcpmram_2
 	call restorecpmram
 	di
-	ld hl,(backup4bcdehl+(3*3))
-	push hl
-	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -785,9 +767,6 @@ bios_adl_conout_crt_cr:
 	call backupcpmram_2
 	call restorecpmram
 	di
-	ld hl,(backup4bcdehl+(3*3))
-	push hl
-	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -813,9 +792,6 @@ bios_adl_conout_crt_lf_skp:
 	call backupcpmram_2
 	call restorecpmram
 	di
-	ld hl,(backup4bcdehl+(3*3))
-	push hl
-	pop af
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -876,9 +852,6 @@ bios_adl_read:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
-	push af
-	pop hl
-	ld (backup4bcdehl+(3*3)),hl
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -1010,9 +983,6 @@ bios_adl_write:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
-	push af
-	pop hl
-	ld (backup4bcdehl+(3*3)),hl
 
 	ld de,dmabuff
 	ld a,mb
@@ -1355,7 +1325,6 @@ diskdma:
 .dl 0
 
 backup4bcdehl:
-.dl 0
 .dl 0
 .dl 0
 .dl 0
