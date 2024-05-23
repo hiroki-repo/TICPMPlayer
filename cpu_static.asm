@@ -717,6 +717,7 @@ em180_ret:
 	jp em180_fetch
 
 em180_djnz:
+	ld hl,(em180_stack4z80inst+(3*11))
 	dec b
 	ld (em180_stack4z80inst+(3*1)),bc
 	ld a,b
