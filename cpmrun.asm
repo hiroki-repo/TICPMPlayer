@@ -92,7 +92,8 @@ cpm00000found:
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 ;lplp:	jr lplp
-	call _em180
+	call _real180
+	;call _em180
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
 notfound:
@@ -1407,6 +1408,10 @@ bios_adl_conin_crt_enableshift_flg:
 bios_backup_of_mbase_and_nmihndler:
 .db 0
 .dl 0
+
+_real180:
+	di
+	jp.sis (hl)
 
 #include "cpu_static.asm"
 
