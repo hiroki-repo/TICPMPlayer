@@ -26,6 +26,16 @@ objname4dimg:
 objname4bdata
 	.db $15,"BUF4PGIN",0
 main4cpmemu:
+	ld a,075h
+	ld (0D005A0h),a	;curXRow
+	ld hl,0220h
+	ld (0D00599h),hl
+	ld a,061h
+	ld (0D007C4h),a
+	ld a,00Ah
+	ld (0D02505h),a
+	ld hl,0
+	ld (0D007C5h),hl
 	ld hl,objname4bdata
 	;call 0020320h	;_Mov9ToOP1
 	;call 002050Ch	;_ChkFindSym
@@ -535,6 +545,44 @@ bios_adl_conin_crt:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	ld a,(buff4sc)
+	or a,a
+	jp nz,bios_adl_conin_crt_1
+	call backupcpmram
+	call restorecpmram_2
+	ld (ixiybak+6),ix
+	ld (ixiybak+9),iy
+	ld ix,(ixiybak+0)
+	ld iy,(ixiybak+3)
+	call 0208B0h	;_CursorOn
+	call 020D8Ch	;_GetKey
+	push af
+	call 0208A8h	;_CursorOff
+	pop af
+	ld b,a
+	ld a,0
+	ld (buff4sc),a
+	ld a,b
+	ld hl,ascii_2_keycode
+	ld de,0
+	ld e,a
+	add hl,de
+	ld a,(hl)
+	cp a,255
+	jp z,bios_adl_conin_crt_3
+	cp a,254
+	jp z,bios_adl_conin_crt_4
+	di
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	ret.l
 	ld a,(buff4sc)
 	or a,a
 	jr z,bios_adl_conin_crt_2
@@ -1303,7 +1351,23 @@ bios_adl_ksc_3:
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
 .db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
-
+ascii_2_keycode:
+.db 000h,01ch,01dh,01eh,01fh,00ah,03dh,000h,000h,008h,008h,008h,000h,000h,000h,000h
+.db 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+.db 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,003h,000h,000h
+.db 000h,020h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+.db 01ah,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+.db 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+.db 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+.db 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+.db 02bh,02dh,02ah,02fh,000h,028h,029h,05bh,05dh,000h,000h,02ch,040h,02eh,030h,031h
+.db 032h,033h,034h,035h,036h,037h,038h,039h,000h,020h,041h,042h,043h,044h,045h,046h
+.db 047h,048h,049h,04ah,04bh,04ch,04dh,04eh,04fh,050h,051h,052h,053h,054h,055h,056h
+.db 057h,058h,059h,05ah,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h,000h
+.db 000,000,000,000,000,000,058,000,000,000,063,034,000,000,000,000
+.db 000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000
+.db 000,000,097,098,099,100,101,102,103,104,105,106,107,108,109,110
+.db 111,112,113,114,115,116,117,118,119,120,121,122,255,000,000,000
 
 dec2hex:
 	and a,0fh
