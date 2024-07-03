@@ -574,7 +574,28 @@ bios_adl_conin_crt:
 	call 020D8Ch	;_GetKey
 	push af
 	call 0208A8h	;_CursorOff
+	cp	a,0fch
+	jr	c,bios_adl_conin_crt_notrans
+bios_adl_conin_crt_transgo:
+	call 020e40h	;_ConvKeyToTok
 	pop af
+	ld a,e
+	di
+	ld bc,(backup4bcdehl+(3*0))
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	ld (ixiybak+0),ix
+	ld (ixiybak+3),iy
+	ld ix,(ixiybak+6)
+	ld iy,(ixiybak+9)
+	call backupcpmram_2
+	call restorecpmram
+	ret.l
+bios_adl_conin_crt_trans:
+	pop af
+	push af
+	jr bios_adl_conin_crt_transgo
+bios_adl_conin_crt_notrans:
 	ld b,a
 	ld a,0
 	ld (buff4sc),a
@@ -584,6 +605,9 @@ bios_adl_conin_crt:
 	ld e,a
 	add hl,de
 	ld a,(hl)
+	or a,a
+	jr z,bios_adl_conin_crt_trans
+	pop hl
 	cp a,255
 	jp z,bios_adl_conin_crt_3
 	cp a,254
