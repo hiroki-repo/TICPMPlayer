@@ -555,6 +555,21 @@ bios_adl_conin_crt:
 	ld (ixiybak+9),iy
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
+	ld a,($D00595)
+	ld l,a
+	ld h,$1A
+	mlt hl
+	or a,a
+	push hl
+	pop bc
+	ld a,($D00596)
+	ld hl,$000000
+	ld l,a
+	ld de,$D006C0
+	add hl,de
+	add hl,bc
+	ld a,020h
+	ld (hl),a
 	call 0208B0h	;_CursorOn
 	call 020D8Ch	;_GetKey
 	push af
