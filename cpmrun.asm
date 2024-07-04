@@ -300,6 +300,9 @@ bios_z80_ttyout__:
 	out0 (0Ch),b
 	ret.l
 bios_z80_ttyst_:
+	ld a,((bios_z80_ttybuffer&0ffffh) + 1)
+	bit 0,a
+	jr nz,bios_z80_ttyst_1
 	ld de,1
 	ld hl, $FFFF - $5000
 bios_z80_ttyst__:
@@ -333,6 +336,7 @@ bios_z80_ttyst___:
 	ld ((bios_z80_ttybuffer&0ffffh) + 0),a
 	ld a,1
 	ld ((bios_z80_ttybuffer&0ffffh) + 1),a
+bios_z80_ttyst_1:
 	ld a,0ffh
 	ret.l
 bios_z80_ttyst_0:
