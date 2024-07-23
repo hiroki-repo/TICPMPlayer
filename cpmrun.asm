@@ -35,7 +35,9 @@ main4cpmemu:
 	ld a,00Ah
 	ld (0D02505h),a
 	ld hl,0
-	ld (0D007C5h),hl
+	ld (0D007C5h),hl;
+	ld a,089h
+	ld (0D00595h),a;curRow
 	ld hl,objname4bdata
 	;call 0020320h	;_Mov9ToOP1
 	;call 002050Ch	;_ChkFindSym
@@ -983,28 +985,30 @@ bios_adl_read:
 	ld (0D0257Bh),hl	;tSymPtr1
 	jp c,bios_adl_read_ramdisk
 	;jp c,bios_adl_rw_error
-	call 0021F98h	;_ChkInRam
-	di
-	jr z,bios_adl_read_inram
-	call 0021448h	;_Arc_Unarc
-	di
+	;call 0021F98h	;_ChkInRam
+	;di
+	;jr z,bios_adl_read_inram
+	;call 0021448h	;_Arc_Unarc
+	;di
 bios_adl_read_inram:
-	di
+	;di
 	ld hl,objname4dimg
 	call 0020320h	;_Mov9ToOP1
 	call 002050Ch	;_ChkFindSym
 	di
-	inc de
-	inc de
-	ex de,hl
+	;inc de
+	;inc de
+	;ex de,hl
+	ld hl,014h
+	add hl,de
 	ld de,dmabuff
 	ld bc,128
 	ldir
-	ex de,hl
-	ld hl,objname4dimg
-	call 0020320h	;_Mov9ToOP1
-	call 002050Ch	;_ChkFindSym
-	call 0021448h	;_Arc_Unarc
+	;ex de,hl
+	;ld hl,objname4dimg
+	;call 0020320h	;_Mov9ToOP1
+	;call 002050Ch	;_ChkFindSym
+	;call 0021448h	;_Arc_Unarc
 	di
 
 	ld (ixiybak+0),ix
