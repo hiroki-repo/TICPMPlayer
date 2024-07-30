@@ -196,13 +196,6 @@ dpblk:
 	.dw	0		;check size -- no checking, so zero
 	.dw	1		;track offset -- first track for system
 
-;It's for time function!
-biostime_vec:
-	.dw 0
-	.db 0
-	.db 0
-	.db 0
-	.fill 07h
 bgbioscalltrptoadl:
 	call.lil bios_adl_boot
 	jp (hl)
@@ -286,6 +279,7 @@ enddat:	.equ	$	 	;end of data area
 datsiz:	.equ	$-begdat;	;size of data area
 hstbuf: 	.fill 256		;buffer for host disk sector
 addrbeepconf:.db 00h
+biostime_vec:	.equ 0fe58h
 biosend:
 biossize:	.equ biosend-biosstart
 .org buffer4trampoline+(biosend-biosstart)
