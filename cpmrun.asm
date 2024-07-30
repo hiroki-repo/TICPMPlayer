@@ -1367,6 +1367,9 @@ bios_adl_time_1:
 	and a,0fh
 	add a,c
 	ld (0F30024h),a
+	ld a,(0F30020h)
+	set 6,a
+	ld (0F30020h),a
 	pop bc
 	pop af
 	ret.l
