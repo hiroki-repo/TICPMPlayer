@@ -26,6 +26,9 @@ objname4dimg:
 objname4bdata
 	.db $15,"BUF4PGIN",0
 main4cpmemu:
+	ld a,mb
+	sub a,cpmbiosbank0pos
+	ld (diskdmabank),a
 	ld a,075h
 	ld (0D005A0h),a	;curXRow
 	ld hl,0220h
@@ -194,11 +197,12 @@ dpblk:
 	.dw	1		;track offset -- first track for system
 
 ;It's for time function!
+biostime_vec:
 	.dw 0
 	.db 0
 	.db 0
 	.db 0
-	.fill 0ch
+	.fill 07h
 bgbioscalltrptoadl:
 	call.lil bios_adl_boot
 	jp (hl)
@@ -1019,7 +1023,9 @@ bios_adl_read_inram:
 	call restorecpmram
 
 	ld hl,dmabuff
-	ld a,mb
+	;ld a,mb
+	ld a,(diskdmabank)
+	add a,cpmbiosbank0pos
 	ld (diskdma+2),a
 	ld de,(diskdma)
 	ld bc,128
@@ -1069,7 +1075,9 @@ bios_adl_read_ramdisk:
 	add hl,bc
 
 	ld bc,128
-	ld a,mb
+	;ld a,mb
+	ld a,(diskdmabank)
+	add a,cpmbiosbank0pos
 	ld (diskdma+2),a
 	ld de,(diskdma)
 ;lplp4ramdisk:	jr lplp4ramdisk
@@ -1086,7 +1094,9 @@ bios_adl_write:
 	ld (backup4bcdehl+(3*2)),hl
 
 	ld de,dmabuff
-	ld a,mb
+	;ld a,mb
+	ld a,(diskdmabank)
+	add a,cpmbiosbank0pos
 	ld (diskdma+2),a
 	ld hl,(diskdma)
 	ld bc,128
@@ -1229,7 +1239,9 @@ bios_adl_write_ramdisk:
 	add hl,bc
 
 	ld bc,128
-	ld a,mb
+	;ld a,mb
+	ld a,(diskdmabank)
+	add a,cpmbiosbank0pos
 	ld (diskdma+2),a
 	ld de,(diskdma)
 	ex de,hl
@@ -1288,16 +1300,112 @@ bios_adl_flush:
 	ld a,1
 	ret.l
 bios_adl_move:
+	push bc
+	push de
+	push hl
 	ldir.sis
+	pop hl
+	pop de
+	pop bc
 	ret.l
 bios_adl_time:
-	ld c,0
+	push af
+	ld a,c
+	and a,a
+	jr nz,bios_adl_time_1
+	ld a,(0F3000Ch)
+	ld (0d00000h+biostime_vec+0),a
+	ld a,(0F3000Dh)
+	ld (0d00000h+biostime_vec+1),a
+	ld a,(0F30008h)
+	daa
+	ld (0d00000h+biostime_vec+2),a
+	ld a,(0F30004h)
+	daa
+	ld (0d00000h+biostime_vec+3),a
+	ld a,(0F30000h)
+	daa
+	ld (0d00000h+biostime_vec+4),a
+	pop af
+	ret.l
+bios_adl_time_1:
+	push bc
+	ld a,(0d00000h+biostime_vec+0)
+	ld (0F30030h),a
+	ld a,(0d00000h+biostime_vec+1)
+	ld (0F30031h),a
+	ld a,(0d00000h+biostime_vec+2)
+	rra
+	rra
+	rra
+	rra
+	and a,0fh
+	ld b,a
+	ld c,10
+	mlt bc
+	ld a,(0d00000h+biostime_vec+2)
+	and a,0fh
+	add a,c
+	ld (0F3002Ch),a
+	ld a,(0d00000h+biostime_vec+3)
+	rra
+	rra
+	rra
+	rra
+	and a,0fh
+	ld b,a
+	ld c,10
+	mlt bc
+	ld a,(0d00000h+biostime_vec+3)
+	and a,0fh
+	add a,c
+	ld (0F30028h),a
+	ld a,(0d00000h+biostime_vec+4)
+	rra
+	rra
+	rra
+	rra
+	and a,0fh
+	ld b,a
+	ld c,10
+	mlt bc
+	ld a,(0d00000h+biostime_vec+4)
+	and a,0fh
+	add a,c
+	ld (0F30024h),a
+	pop bc
+	pop af
 	ret.l
 bios_adl_selmem:
+	push af
+	add a,cpmbiosbank0pos
+	ld mb,a
+	pop af
 	ret.l
 bios_adl_setbnk:
+	ld (diskdmabank),a
 	ret.l
 bios_adl_xmove:
+	push af
+	push bc
+	push de
+	push hl
+	ld (backup4bcdehl+(3*1)),de
+	ld (backup4bcdehl+(3*2)),hl
+	ld a,c
+	add a,cpmbiosbank0pos
+	ld (backup4bcdehl+(3*2)+2),a
+	ld a,b
+	add a,cpmbiosbank0pos
+	ld (backup4bcdehl+(3*1)+2),a
+	ld de,(backup4bcdehl+(3*1))
+	ld hl,(backup4bcdehl+(3*2))
+	ld bc,128
+	ldir
+	pop hl
+	pop de
+	pop bc
+	pop af
 	ret.l
 bios_adl_userf:
 	cp a,0
@@ -1455,6 +1563,11 @@ bios_adl_conin_crt_enableshift_flg:
 bios_backup_of_mbase_and_nmihndler:
 .db 0
 .dl 0
+
+diskdmabank:
+.db 01h
+
+cpmbiosbank0pos:	.equ 0cfh
 
 _real180:
 	di
