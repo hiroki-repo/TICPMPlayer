@@ -65,6 +65,9 @@ main4cpmemu_1:
 	ld (disktrk+2),a
 	;call 0210e0h	;_MemSet
 	call backupcpmram_2
+	ld a,(cpmappparam)
+	bit 0,a
+	call nz,cpmapploader
 	ld bc,010000h
 	ld hl,0d00000h
 	ld a,0
@@ -142,6 +145,13 @@ restorecpmram_2:
 	ld hl,(ptr4allocedmem+3)
 	ld de,0d00000h
 	ld bc,32768;65536
+	ldir
+	ret
+
+cpmapploader:
+	ld hl,(cpmappparam+3)
+	ld de,0d00100h
+	ld bc,usercpmappsize
 	ldir
 	ret
 
@@ -482,10 +492,6 @@ bios_adl_wboot_3:
 	ld de,081h
 	ld bc,128
 	ldir.sis
-	ld hl,(cpmappparam+3)
-	ld de,0d00100h
-	ld bc,usercpmappsize
-	ldir
 	ld a,(cpmappparam+1)
 	ld c,a
 	ld.sis sp,0ff80h
