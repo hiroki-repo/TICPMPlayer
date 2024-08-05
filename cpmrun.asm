@@ -23,9 +23,14 @@
 	.db "CP/M",0
 objname4dimg:
 	.db $15,"CPM00000",0
-objname4bdata
+objname4bdata:
 	.db $15,"BUF4PGIN",0
+cpmappparam:
+	.dl 0
+	.dl usercpmappstart
 main4cpmemu:
+	ld a,(cpmappparam)
+	ld (cpmparamk),a
 	ld a,mb
 	sub a,cpmbiosbank0pos
 	ld (diskdmabank),a
@@ -448,7 +453,45 @@ bios_adl_wboot_2:
 	ld.sis sp,0080h
 	ld.sis a,(4)
 	ld c,a
+	ld a,(cpmparamk)
+	bit 0,a
+	jr nz,bios_adl_wboot_3
+	ld a,c
 	ld hl,(cpmbegin)
+	ret.l
+bios_adl_wboot_3:
+	ld a,(cpmparamk)
+	res 0,a
+	ld (cpmparamk),a
+	ld a,0
+	ld.sis (05ch),a
+	ld.sis (06ch),a
+	ld.sis (080h),a
+	ld a,020h
+	ld.sis (05dh),a
+	ld.sis (06dh),a
+	ld hl,05dh
+	ld de,05eh
+	ld bc,10
+	ldir.sis
+	ld hl,06dh
+	ld de,06eh
+	ld bc,10
+	ldir.sis
+	ld hl,080h
+	ld de,081h
+	ld bc,128
+	ldir.sis
+	ld hl,(cpmappparam+3)
+	ld de,0d00100h
+	ld bc,usercpmappsize
+	ldir
+	ld a,(cpmappparam+1)
+	ld c,a
+	ld.sis sp,0ff80h
+	ld hl,0fa03h
+	push.sis hl
+	ld hl,0100h
 	ret.l
 bios_adl_const:
 	ld.sis a,(3)
@@ -1540,6 +1583,8 @@ dec2hex_bchlbak:
 
 dec2hexsmp:
 .db "0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"
+cpmparamk:
+.db 0
 
 disktrk:
 .dl 0
@@ -1583,4 +1628,7 @@ backupeddata16384:	.equ $;0d20000h
 ;.fill 65536
 backupeddata16384_2:	.equ ($+65536);0d30000h
 ;.fill 8192
+.fill 010000h-($-0d1a881h)-2-09FFEh
+usercpmappstart:
 .fill 010000h-($-0d1a881h)-2-04000h
+usercpmappsize:	.equ $-usercpmappstart
