@@ -65,13 +65,13 @@ main4cpmemu_1:
 	ld (disktrk+2),a
 	;call 0210e0h	;_MemSet
 	call backupcpmram_2
-	ld a,(cpmappparam)
-	bit 0,a
-	call nz,cpmapploader
 	ld bc,010000h
 	ld hl,0d00000h
 	ld a,0
 	call 0210e0h	;_MemSet
+	ld a,(cpmappparam)
+	bit 0,a
+	call nz,cpmapploader
 	ld bc,biossize
 	ld de,0d0fa00h
 	ld hl,buffer4trampoline
@@ -490,7 +490,7 @@ bios_adl_wboot_3:
 	ldir.sis
 	ld hl,080h
 	ld de,081h
-	ld bc,128
+	ld bc,127
 	ldir.sis
 	ld a,(cpmappparam+1)
 	ld c,a
