@@ -105,7 +105,10 @@ cpm00000found:
 	ld (ixiybak+0),ix
 	ld (ixiybak+3),iy
 ;lplp:	jr lplp
+	di
+	call saveexxreg
 	call _real180
+	call loadexxreg
 	;call _em180
 	ld ix,(ixiybak+0)
 	ld iy,(ixiybak+3)
@@ -153,6 +156,35 @@ cpmapploader:
 	ld de,0d00100h
 	ld bc,usercpmappsize
 	ldir
+	ret
+
+saveexxreg:
+	exx
+	ld (backregcontext+(3*0)),bc
+	ld (backregcontext+(3*1)),de
+	ld (backregcontext+(3*2)),hl
+	exx
+	ex af,af'
+	push hl
+	push af
+	pop hl
+	ld (backregcontext+(3*3)),hl
+	pop hl
+	ex af,af'
+	ret
+loadexxreg:
+	ex af,af'
+	push hl
+	ld hl,(backregcontext+(3*3))
+	push hl
+	pop af
+	pop hl
+	ex af,af'
+	exx
+	ld bc,(backregcontext+(3*0))
+	ld de,(backregcontext+(3*1))
+	ld hl,(backregcontext+(3*2))
+	exx
 	ret
 
 buffer4trampoline:
@@ -537,6 +569,7 @@ bios_adl_const_crt:
 	ld a,(buff4sc)
 	or a,a
 	jr nz,bios_adl_const_crt_
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -552,6 +585,7 @@ bios_adl_const_crt:
 	call backupcpmram_2
 	call restorecpmram
 	di
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -602,6 +636,7 @@ bios_adl_conin_crt:
 	ld a,(buff4sc)
 	or a,a
 	jp nz,bios_adl_conin_crt_1
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -643,6 +678,7 @@ bios_adl_conin_crt_transgo:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	ret.l
 bios_adl_conin_crt_trans:
 	pop af
@@ -675,6 +711,7 @@ bios_adl_conin_crt_notrans:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	ret.l
 	ld a,(buff4sc)
 	or a,a
@@ -703,6 +740,7 @@ bios_adl_conin_crt_2_reset_alpha:
 	bit 0,a
 	jp nz,bios_adl_conin_crt_enableshift
 bios_adl_conin_crt_2:
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -723,8 +761,10 @@ bios_adl_conin_crt_2_:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	jp bios_adl_conin_crt_1
 bios_adl_conin_crt_3:
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -742,6 +782,7 @@ bios_adl_conin_crt_3_:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	ld hl,bios_adl_ksc_2
 	ld bc,0
 	ld c,a
@@ -757,6 +798,7 @@ bios_adl_conin_crt_3_:
 	ld hl,(backup4bcdehl+(3*2))
 	ret.l
 bios_adl_conin_crt_4:
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -774,6 +816,7 @@ bios_adl_conin_crt_4_:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	ld hl,bios_adl_ksc_3
 	ld bc,0
 	ld c,a
@@ -830,6 +873,7 @@ bios_adl_conout_crt:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -855,6 +899,7 @@ bios_adl_conout_crt_show4proced:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	di
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
@@ -879,6 +924,7 @@ bios_adl_conout_crt_bs:
 	call backupcpmram_2
 	call restorecpmram
 	di
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -896,6 +942,7 @@ bios_adl_conout_crt_bs_pl:
 	call backupcpmram_2
 	call restorecpmram
 	di
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -910,6 +957,7 @@ bios_adl_conout_crt_cr:
 	call backupcpmram_2
 	call restorecpmram
 	di
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -936,6 +984,7 @@ bios_adl_conout_crt_lf_skp:
 	call backupcpmram_2
 	call restorecpmram
 	di
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -996,6 +1045,7 @@ bios_adl_read:
 	ld (backup4bcdehl+(3*0)),bc
 	ld (backup4bcdehl+(3*1)),de
 	ld (backup4bcdehl+(3*2)),hl
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -1064,6 +1114,7 @@ bios_adl_read_inram:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 
 	ld hl,dmabuff
 	;ld a,mb
@@ -1087,6 +1138,7 @@ bios_adl_rw_error:
 	di
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -1101,6 +1153,7 @@ bios_adl_read_ramdisk:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 
 	ld hl,0
 	ld a,(disktrk)
@@ -1145,6 +1198,7 @@ bios_adl_write:
 	ld bc,128
 	ldir
 
+	call loadexxreg
 	call backupcpmram
 	call restorecpmram_2
 	ld (ixiybak+6),ix
@@ -1211,6 +1265,7 @@ bios_adl_write_inram:
 	di
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -1252,6 +1307,7 @@ bios_adl_write_newfile_2:
 	di
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 	ld bc,(backup4bcdehl+(3*0))
 	ld de,(backup4bcdehl+(3*1))
 	ld hl,(backup4bcdehl+(3*2))
@@ -1265,6 +1321,7 @@ bios_adl_write_ramdisk:
 	ld iy,(ixiybak+9)
 	call backupcpmram_2
 	call restorecpmram
+	call saveexxreg
 
 	ld hl,0
 	ld a,(disktrk)
@@ -1616,6 +1673,12 @@ diskdmabank:
 .db 01h
 
 cpmbiosbank0pos:	.equ 0cfh
+
+backregcontext:
+	.dl 0
+	.dl 0
+	.dl 0
+	.dl 0
 
 _real180:
 	di
